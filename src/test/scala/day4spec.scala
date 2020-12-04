@@ -75,6 +75,6 @@ class Day4Spec extends AnyFlatSpec with Matchers {
 
   "Part2" should "calculate solution" in {
     var day4 = new Day4(InputLines.forDay(4))
-    day4.passports.count(_.isStrictlyValid) shouldEqual 141
+    day4.passports.count(_.isStrictlyValid) shouldEqual 140
   }
 }

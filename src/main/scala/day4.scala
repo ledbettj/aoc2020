@@ -1,49 +1,68 @@
 package day4
 
-import scala.collection.mutable
+import scala.util.matching.Regex
+
+trait Validator {
+  def isValid(value: String) : Boolean
+}
+
+class YearValidator(range: Range) extends Validator {
+  def isValid(value: String): Boolean = value.toIntOption.map(range.contains(_)).getOrElse(false)
+}
+
+class RegexValidator(regex: Regex) extends Validator {
+  def isValid(value: String): Boolean = regex.matches(value)
+}
+
+class HexColorValidator extends RegexValidator(raw"^#[0-9A-Fa-f]{6}$$".r)
+
+class SetValidator(set: Set[String]) extends Validator {
+  def isValid(value: String): Boolean = set.contains(value)
+}
+
+object SetValidator {
+  def apply(s: String*): SetValidator = new SetValidator(Set(s:_*))
+}
+
+class HeightValidator(unitRanges: Map[String, Range]) extends Validator {
+  val regex = raw"^(\d+)(\w+)$$".r
+
+  def isValid(value: String): Boolean = {
+    regex
+      .findFirstMatchIn(value)
+      .map(matchData => {
+        val size = matchData.group(1).toInt
+        val unit = matchData.group(2).toString.toLowerCase
+        unitRanges
+          .get(unit)
+          .map(_.contains(size))
+          .getOrElse(false)
+      })
+      .getOrElse(false)
+  }
+}
 
 class Passport {
-  var data: mutable.Map[String, String] = mutable.Map()
-  // ignore cid for Part1
-  val RequiredFields = List("byr", "iyr", "eyr", "hgt", "hcl", "ecl", "pid") //, "cid")
+  var data: Map[String, String] = Map()
+
+  val RequiredFields = Set("byr", "iyr", "eyr", "hgt", "hcl", "ecl", "pid")
+  val Validators : Map[String, Validator] = Map(
+    "byr" -> new YearValidator(1920 to 2002),
+    "iyr" -> new YearValidator(2010 to 2020),
+    "eyr" -> new YearValidator(2020 to 2030),
+    "hgt" -> new HeightValidator(Map("in" -> (59 to 76), "cm" -> (150 to 193))),
+    "hcl" -> new HexColorValidator(),
+    "ecl" -> SetValidator("amb", "blu", "brn", "gry", "grn", "hzl", "oth"),
+    "pid" -> new RegexValidator(raw"^[0-9]{9}$$".r)
+  )
 
   // part1
-  def isLooslyValid : Boolean = RequiredFields.forall(data.keySet.contains(_))
+  def isLooslyValid : Boolean = RequiredFields.subsetOf(data.keySet)
 
   // part2
   def isStrictlyValid : Boolean = {
-    isLooslyValid &&
-    validYearBetween(data("byr"), 1920 to 2002) &&
-    validYearBetween(data("iyr"), 2010 to 2020) &&
-    validYearBetween(data("eyr"), 2020 to 2030) &&
-    validHeight(data("hgt")) &&
-    raw"^#[0-9a-fA-F]{6}$$".r.matches(data("hcl")) &&
-    Set("amb", "blu", "brn", "gry", "grn", "hzl", "oth").contains(data("ecl")) &&
-    "^[0-9]{9}$".r.matches(data("pid"))
-  }
-
-  private def validYearBetween(value: String, range: Range) : Boolean = {
-    value.toIntOption match {
-      case Some(v) => range.contains(v)
-      case None => false
-    }
-  }
-
-  private def validHeight(value: String) : Boolean = {
-    val regex = raw"^(\d+)(in|cm)$$".r
-
-    regex.findFirstMatchIn(value) match {
-      case None => false
-      case Some(m) => {
-        val size = m.group(1).toInt
-        val unit = m.group(2).toString().toLowerCase()
-
-        unit match {
-          case "in" => (59 to 76).contains(size)
-          case "cm" => (150 to 193).contains(size)
-          case _ => false
-        }
-      }
+    isLooslyValid && Validators.forall { case (fieldName, validator) =>
+      validator.isValid(data(fieldName))
     }
   }
 
@@ -54,11 +73,11 @@ class Passport {
         val result = segment.split(':')
         (result(0), result(1))
       })
-    .foreach(insert)
+      .foreach(insert)
   }
 
   def keys = data.keySet
-  def insert(field : (String, String)) = data(field._1) = field._2
+  def insert(kv : (String, String)) = data = data + kv
 }
 
 class Day4(input: Iterator[String]) {
