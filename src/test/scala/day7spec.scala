@@ -55,7 +55,7 @@ class Day7Spec extends AnyFlatSpec with Matchers {
     val target = Bag("shiny", "gold")
     val d7 = new Day7(InputLines.forDay(7))
 
-    d7.rules.containsCount(target) shouldEqual 126
+    d7.rules.containsCount(target) shouldEqual 45157
 
   }
 }
