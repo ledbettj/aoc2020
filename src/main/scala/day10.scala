@@ -17,14 +17,12 @@ class Jolty(input: Iterator[String]) {
   }
 
   def validWays : Long = {
-    val m = scala.collection.mutable.Map[Int, Long](0 -> 1L)
-    (adapters :+ device).foreach(value => {
-      val opts = (0 to 3)
-        .map(offset => value - offset)
-        .filter(n => n >= 0)
-      m(value) = opts.map(n => m.getOrElse(n, 0L)).sum
+    val dp = scala.collection.mutable.Map[Int, Long](0 -> 1L)
+
+    (adapters :+ device).foreach(adapter => {
+      dp(adapter) = (1 to 3).map(x => dp.getOrElse(adapter - x, 0L)).sum
     })
 
-    m(device)
+    dp(device)
   }
 }
