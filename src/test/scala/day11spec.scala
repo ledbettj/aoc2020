@@ -32,16 +32,12 @@ class Day11Spec extends AnyFlatSpec with Matchers {
 
   "Part2" should "work for sample" in {
     var p = SeatLayout.parse(sampleInput.toIterator)
-    p.display()
-
     var n = p.step2
     while(!n.isEmpty) {
       p = n.get
-      p.display()
 
       n = p.step2()
     }
-    p.display()
     p.occupiedCount() shouldEqual 26
   }
 
@@ -66,7 +62,7 @@ class Day11Spec extends AnyFlatSpec with Matchers {
       p = n.get
       n = p.step2()
     }
-    p.occupiedCount() shouldEqual 2166
+    p.occupiedCount() shouldEqual 1955
   }
 
 }
