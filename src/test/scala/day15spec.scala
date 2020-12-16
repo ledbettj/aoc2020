@@ -28,6 +28,6 @@ class Day15Spec extends AnyFlatSpec with Matchers {
     while (g.turn != 30_000_001) {
       g.step()
     }
-    g.current shouldEqual 1025
+    g.current shouldEqual 129262
   }
 }
