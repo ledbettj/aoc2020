@@ -72,7 +72,6 @@ object Part1 {
         case LParen() => evaluate(tokens)
         case t => throw new Exception(s"Parse error, unexpected token $t: expected ( or literal")
       }
-      println(s"$lhs $op $rhs")
       lhs = op.eval(lhs, rhs)
     }
 
@@ -80,28 +79,3 @@ object Part1 {
   }
 }
 
-
-class Node(var value: Long, var children: IndexedSeq[Node] = IndexedSeq());
-
-object Parser {
-  def parse(line: String) : Node = {
-    val tokens = Token.tokenize(line).toIterator
-
-    parseExpression(tokens)
-  }
-
-  def parseExpression(tokens: Iterator[Token]) : Node = {
-    val lhs = parseTerm(tokens)
-
-  }
-
-  def parseBinary(lhs: Node, 
-
-  def parseTerm(tokens: Iterator[Token]) : Node = {
-    tokens.next() match {
-      case LParen() => parseExpression(tokens)
-      case Literal(v) => new Node(v)
-    }
-  }
-
-}
